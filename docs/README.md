@@ -1,0 +1,1 @@
+### Documentation is stored here about the project architecture ###
