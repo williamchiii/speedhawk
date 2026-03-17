@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import logger from "./utils/logger.js"
-import dotenv from "dotenv";
+import "dotenv/config"; 
 
 //this creates the main express app
 const app = express();

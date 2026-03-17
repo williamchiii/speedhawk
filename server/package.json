@@ -5,17 +5,21 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test:redis": "node src/config/redis.js",
+    "test:db" : "node -e \"import('./src/config/database.js').then(m => m.testDatabase())\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@upstash/redis": "^1.37.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "nodemon": "^3.1.14",
+    "pg": "^8.20.0",
     "winston": "^3.19.0"
   }
 }

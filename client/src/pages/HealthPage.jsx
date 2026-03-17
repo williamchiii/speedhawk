@@ -5,7 +5,7 @@ const HealthPage = () => {
     const [message, setMessage] = useState("Checking backend...");
 
     useEffect(() => {
-        fetch("http://localhost:5001/health")
+        fetch("http://localhost:3001/health") //hard coded url/port, change later on
         .then((res) => res.json())
         .then((data) => {
             setMessage(`Backend status: ${data.status} (${data.service})`);
