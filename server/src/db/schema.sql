@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS metrics (
     fcp INTEGER,
     lcp INTEGER,
     bundle_size INTEGER,
-    image_weight INTEGER
 );
 
 -- Create suggestions table
