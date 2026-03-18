@@ -7,7 +7,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "test:redis": "node src/config/redis.js",
-    "test:db" : "node -e \"import('./src/config/database.js').then(m => m.testDatabase())\""
+    "test:db": "node -e \"import('./src/config/database.js').then(m => m.testDatabase())\""
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   "type": "module",
   "dependencies": {
     "@upstash/redis": "^1.37.0",
+    "bullmq": "^5.71.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",

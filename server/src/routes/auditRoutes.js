@@ -1,6 +1,7 @@
 import express from "express";
 import pool from "../config/database.js"
 import logger from "../utils/logger.js"
+import auditQueue from "../config/queue.js";
 
 const router = express.Router();
 
@@ -17,8 +18,13 @@ router.post('/', async (req, res) => {
         );
         const audit = result.rows[0];
 
-        //TODO: Push job queue to Redis 
-        logger.info(`Created audit ${audit.id} for ${url}`);
+        //push job to Redis queue
+        await auditQueue.add("process-audit", {
+            auditId: audit.id,
+            url: audit.url
+        });
+
+        logger.info(`Created audit ${audit.id} for ${url} and enqueued job`);
 
         res.status(201).json({
             success: true,
