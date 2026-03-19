@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@google/genai": "^1.46.0",
     "bullmq": "^5.71.0",
     "dotenv": "^17.3.1",
     "lighthouse": "^13.0.3",

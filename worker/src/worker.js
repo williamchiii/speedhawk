@@ -15,15 +15,15 @@ const worker = new Worker("audits", processAudit, {
 });
 
 worker.on("completed", (job) => {
-    console.log(`Job ${job.id} completed \n`);
+  console.log(`Job ${job.id} completed \n`);
 });
 
 worker.on("failed", (job, err) => {
-    console.error(`❌ Job ${job.id} failed:`, err.message);
+  console.error(`❌ Job ${job.id} failed:`, err.message);
 });
 
 worker.on("error", (err) => {
-    console.error("Worker error:", err);
+  console.error("Worker error:", err);
 });
 
 console.log("Worker is running and waiting for jobs...\n");

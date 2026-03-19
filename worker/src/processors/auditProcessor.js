@@ -1,6 +1,7 @@
 import lighthouse from "lighthouse";
 import puppeteer from "puppeteer";
 import pool from "../config/database.js";
+import { GoogleGenAI } from "@google/genai";
 
 export async function processAudit(job){
     const { auditId, url } = job.data;
@@ -53,26 +54,53 @@ export async function processAudit(job){
             [auditId, ttfb, fcp, lcp, bundleSize]
         );
 
-        //generate suggestions based on the performance thresholds
-        //TODO: Implement OpenAI integration for the suggestions
-        //This is a placeholder for now
+        //generate suggestions based on the performance thresholds with Google Gemini
         const suggestions = [];
-        suggestions.push({
-            type: "performance",
-            message: "Example message 1",
-            impact: "high"
-        });
-        suggestions.push({
-            type: "performance",
-            message: "Example message 2",
-            impact: "high",
-        });
-        suggestions.push({
-            type: "performance",
-            message: "Example message 3",
-            impact: "high",
-        });
+        try{
+            const ai = new GoogleGenAI({}); //automatically gets GEMINI_API_KEY from .env
+            const prompt = `You are a web performance expert. Analyze these metrics and generate 2-4 specific, actionable suggestions to improve performance:
+                Performance Score: ${score}/100
+                TTFB (Time to First Byte): ${ttfb}ms (good: <800ms)
+                FCP (First Contentful Paint): ${fcp}ms (good: <1800ms)
+                LCP (Largest Contentful Paint): ${lcp}ms (good: <2500ms)
+                JavaScript Bundle Size: ${bundleSize}KB
 
+                Return ONLY a JSON array with this exact format (no markdown, no code blocks, no explanation):
+                [
+                {"type": "performance", "message": "specific suggestion here", "impact": "high"},
+                {"type": "bundle", "message": "specific suggestion here", "impact": "medium"}
+                ]
+
+                Focus on the worst metrics. Be specific and actionable.`;
+            const result = await ai.models.generateContent({
+                model: "gemini-3-flash-preview",
+                contents: prompt,
+            });
+            const aiResponse = result.text.trim();
+            const cleanResponse = aiResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+            const aiSuggestions = JSON.parse(cleanResponse);
+            suggestions.push(...aiSuggestions);
+            console.log(`[Job ${job.id}] Generated ${suggestions.length} AI suggestions via Gemini`);
+        } catch(err){
+            console.error("Gemini API error. Possibly exceeded rate limit");
+            console.error(err)
+            // Fallback to rule-based suggestions if AI fails
+            if (lcp > 2500) {
+                suggestions.push({
+                type: 'performance',
+                message: 'LCP exceeds recommended threshold. Optimize images and reduce server response time.',
+                impact: 'high'
+                });
+            }
+            if (bundleSize > 500) {
+                suggestions.push({
+                type: 'bundle',
+                message: 'JavaScript bundle is large. Consider code splitting and lazy loading.',
+                impact: 'medium'
+                });
+            }
+        }
+        
         //save sugestions to databse
         for (const suggestion of suggestions){
             await pool.query(
