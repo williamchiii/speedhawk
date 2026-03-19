@@ -48,20 +48,36 @@ router.post('/', async (req, res) => {
 router.get("/:id", async (req, res) => {
     try{
         const { id } = req.params;
-        const result = await pool.query(
+
+        //get audit table
+        const auditResult = await pool.query(
             'SELECT * FROM audits WHERE id = $1', [id]
         );
-        if (result.rows.length === 0){
-            return res.status(404).json({
-                success: false,
-                error: 'Audit not found'
-            });
+        if (auditResult.rows.length === 0) {
+          return res.status(404).json({
+            success: false,
+            error: "Audit not found",
+          });
         }
-        const audit = result.rows[0];
+        const audit = auditResult.rows[0];
+
+        //get metrics table
+        const metricsResult = await pool.query(
+            'SELECT * FROM metrics WHERE audit_id = $1', [id]
+        );
+
+        //get suggestions
+        const suggestionsResult = await pool.query(
+            'SELECT * FROM suggestions WHERE audit_id = $1', [id]
+        );
+
+        //send the response to client
         res.json({
-            success: true,
-            audit
+            ...audit,
+            metrics: metricsResult.rows[0] || null,
+            suggestions: suggestionsResult.rows || []
         });
+
     } catch(err){
         logger.error(`Error fetching audit: ${err}`);
         res.status(500).json({
