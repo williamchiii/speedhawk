@@ -5,9 +5,7 @@ const createRateLimiter = (limiterInstance) => {
   return async (req, res, next) => {
     try {
       //each ip has its own rate limit, in future date have ip or user depending on login or not
-      const ip =
-        req.headers["x-forwarded-for"]?.split(",")[0] ||
-        req.socket.remoteAddress;
+      const ip = req.ip;
       const { success } = await limiterInstance.limit(ip);
       if (!success) {
         logger.error(`rate limiting hit`);
