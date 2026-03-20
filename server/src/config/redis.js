@@ -1,22 +1,17 @@
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import logger from "../utils/logger.js"
-import "dotenv/config"; 
+import "dotenv/config";
 
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+//This is used for ratelimiting
+
+//retrieve and export redis creds
+export const redis = Redis.fromEnv();
+
+export const strictRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(1, "60 s"), //5 per 60s
 });
-
-async function testRedis() {
-    try{
-        logger.info("Testing Redis Connection");
-        await redis.set('test-key', 'Test value');
-        const value = await redis.get('test-key');
-        logger.info(`"Got Value: ${value}`);
-        logger.info("Redis connection successful!")
-    } catch (error){
-        logger.critical("Error connecting to Upstash Redis");
-    }
-};
-
-testRedis();
+export const generousRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, "60 s"), //60 per 1 minute
+});
