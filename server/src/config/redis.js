@@ -9,7 +9,7 @@ export const redis = Redis.fromEnv();
 
 export const strictRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, "60 s"), //5 per 60s
+  limiter: Ratelimit.slidingWindow(2, "30 s"), //2 per 30s
 });
 export const generousRateLimit = new Ratelimit({
   redis,

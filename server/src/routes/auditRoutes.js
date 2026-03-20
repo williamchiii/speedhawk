@@ -2,7 +2,7 @@ import express from "express";
 import {
     createAudit,
     getAudit,
-} from "../controllers/restAPI.js";
+} from "../controllers/auditController.js";
 import { strictRateLimiter, generousRateLimiter } from "../middlewares/rateLimiter.js";
 const router = express.Router();
 
