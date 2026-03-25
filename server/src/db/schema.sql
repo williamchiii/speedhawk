@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS metrics (
     ttfb INTEGER,
     fcp INTEGER,
     lcp INTEGER,
-    bundle_size INTEGER,
+    bundle_size INTEGER
 );
 
 -- Create suggestions table

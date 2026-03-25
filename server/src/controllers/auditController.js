@@ -1,13 +1,18 @@
 import pool from "../config/database.js"
 import logger from "../utils/logger.js"
 import auditQueue from "../config/queue.js";
+import { isValidURL, normalizeURL } from "../utils/urlValidate.js";
 
 //CREATE: create a new audit and push job to Redis queue
 //Route: POST /api/audits
 export async function createAudit(req, res) {
     try{
-        const { url } = req.body;
-        //TODO: add URL validation here
+        var { url } = req.body;
+
+        url = normalizeURL(url) //adds https// to URL if it doesnt have it
+        if (!isValidURL(url)){ 
+            return res.status(400).json({error: "URL is not valid"});
+        }
 
         //Create pending audit in the database
         const result = await pool.query(
