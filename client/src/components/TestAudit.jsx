@@ -39,19 +39,21 @@ const TestAudit = () => {
   };
 
   return (
-    <div>
-      <form onSubmit={testAudit}>
+    <div className="w-full max-w-7xl flex flex-col gap-4">
+      <form className="input input-bordered h-15 w-full max-w-xl self-center" onSubmit={testAudit}>
         <input
           type = "text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder = "https://example.com"
         />
-        <button type="submit">
+        <button className="btn btn-primary"type="submit">
           Test
         </button>
       </form>
-      <pre>{result}</pre>
+      {result && (
+        <pre className="bg-base-200 rounded-lg p-4 text-sm overflow-auto max-h-[70vh] w-full">{result}</pre>
+      )}
     </div>
   );
 }
