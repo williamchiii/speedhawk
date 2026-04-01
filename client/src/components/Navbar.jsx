@@ -3,17 +3,20 @@ import { useNavigate } from "react-router";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  function handleClick(){
+  function returnHome(){
+    navigate("/");
+  }
+  function goToHealth() {
     navigate("/health");
   }
 
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="flex-1">
-        <a onClick={handleClick} className="btn btn-ghost text-xl">SpeedHawk</a>
+        <a onClick={returnHome} className="btn btn-ghost text-xl">SpeedHawk</a>
       </div>
       <div className="flex-none">
-        <button onClick={handleClick} className="btn btn-square btn-ghost">
+        <button onClick={goToHealth} className="btn btn-square btn-ghost">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
