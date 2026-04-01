@@ -14,17 +14,16 @@ worker/   # Background job processor, Gemini API
 ~~~
 
 ## Prerequisites
-- Node.js
-- Docker (for PostgreSQL)
+- Node.js and npm
+- Docker Desktop
+- Goose (for database migrations)
 
 ## Setup
-1. Start the Database (on root directory):
+1. Start all the docker containers (on root directory):
 ~~~
-docker-compose up -d
+docker-compose up --build
 ~~~
-2. Install dependencies and start each service:
+2. Run database migrations on new terminal on root directory (replace the {} with yours)
 ~~~
-cd server && npm install && npm run dev
-cd worker && npm install && npm run dev
-cd client && npm install && npm run dev
+goose -dir ./server/internal/database/migrations postgres "postgresql://{USER}:{PASSWORD}@localhost:5432/{DB_NAME}?sslmode=disable" up
 ~~~

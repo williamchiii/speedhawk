@@ -19,8 +19,9 @@ export async function processAudit(job) {
 
     //launch headless browser and run lighthouse
     const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      executablePath: process.env.CHROME_BIN || "/usr/bin/chromium",
       headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const { lhr } = await lighthouse(url, {

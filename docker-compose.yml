@@ -7,9 +7,29 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "8080:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresqldo
-
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+  server:
+    build: ./server
+    ports: 
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    env_file: server/.env
+  worker:
+    build: ./worker
+    volumes:
+      - ./worker:/app
+      - /app/node_modules
+    env_file: worker/.env
 volumes:
   postgres_data:
