@@ -1,18 +1,19 @@
 //this page checks the health of the API
+import axios from "axios";
 import { useEffect, useState } from 'react';
 
 const HealthPage = () => {
     const [message, setMessage] = useState("Checking backend...");
 
     useEffect(() => {
-        fetch("http://localhost:3001/health") //hard coded url/port, change later on
-        .then((res) => res.json())
-        .then((data) => {
-            setMessage(`Backend status: ${data.status} (${data.service})`);
-        })
-        .catch(() => {
-            setMessage("Failed to connect to backend");
-        });
+        axios
+            .get("http://localhost:3001/health")
+            .then(response => {
+                setMessage(JSON.stringify(response.data));
+            })
+            .catch(() => {
+                setMessage("Failed to connect to server");
+            })
     }, []);
 
     return (

@@ -31,6 +31,7 @@ export async function createAudit(req, res) {
 
         res.status(201).json({
             success: true,
+            //this is the payload the client sees when response.audit
             audit: {
                 id: audit.id,
                 url: audit.url,

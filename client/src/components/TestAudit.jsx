@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 
 const TestAudit = () => {
@@ -6,15 +7,10 @@ const TestAudit = () => {
 
   const testAudit = async (e) => {
     e.preventDefault();
-    
-    //create audit
-    const createRes = await fetch("http://localhost:3001/api/audits", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({url}),
-    });
-    const response = await createRes.json();
-    const audit = response.audit;
+
+    //create audit (with axios)
+    const createRes = await axios.post("http://localhost:3001/api/audits", {url});
+    const audit = createRes.data.audit;
 
     setResult(`Created audit ${audit.id}, waiting...`);
 
@@ -23,8 +19,10 @@ const TestAudit = () => {
     const maxAttempts = 120/2; //max seconds / 2
     while (attempts < maxAttempts) {
       await new Promise((resolve) => setTimeout(resolve, 2000)); //wait 2 sec
-      let getRes = await fetch(`http://localhost:3001/api/audits/${audit.id}`);
-      const data = await getRes.json();
+
+      const getRes = await axios.get(`http://localhost:3001/api/audits/${audit.id}`);
+      const data = getRes.data;
+
       if (data.status === "complete") {
         setResult(JSON.stringify(data, null, 2));
         return;
