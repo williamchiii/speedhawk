@@ -25,6 +25,12 @@ export async function createAudit(req, res) {
         await auditQueue.add("process-audit", {
             auditId: audit.id,
             url: audit.url
+        }, {
+            attempts: 2,
+            backoff: {
+                type: "exponential",
+                delay: 2000
+            }
         });
 
         logger.info(`Created audit ${audit.id} for ${url} and enqueued job`);
