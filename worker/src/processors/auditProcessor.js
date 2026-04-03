@@ -8,8 +8,7 @@ import "dotenv/config";
 export async function processAudit(job) {
   const { auditId, url } = job.data;
 
-  console.log(`[Job ${job.id}] Processing audit ${auditId} for ${url}`);
-
+  console.log(`[Job ${job.id}] Processing audit ${auditId} for ${url}`);  
   try {
     //update audti status to running
     await pool.query("UPDATE audits SET status = $1 WHERE id = $2", [

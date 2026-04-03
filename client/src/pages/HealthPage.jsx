@@ -8,11 +8,11 @@ const HealthPage = () => {
     useEffect(() => {
         axios
             .get("http://localhost:3001/health")
-            .then(response => {
-                setMessage(JSON.stringify(response.data));
+            .then(({ data }) => {
+                setMessage(`Backend status: ${data.status} (${data.service})`);
             })
             .catch(() => {
-                setMessage("Failed to connect to server");
+                setMessage("Failed to connect to backend");
             })
     }, []);
 
