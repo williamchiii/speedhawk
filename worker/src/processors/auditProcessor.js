@@ -10,7 +10,11 @@ export async function processAudit(job) {
 
   console.log(`[Job ${job.id}] Processing audit ${auditId} for ${url}`);  
   try {
-    //update audti status to running
+    // Clean up any partial data from a previous attempt before retrying
+    await pool.query("DELETE FROM suggestions WHERE audit_id = $1", [auditId]);
+    await pool.query("DELETE FROM metrics WHERE audit_id = $1", [auditId]);
+
+    //update audit status to running
     await pool.query("UPDATE audits SET status = $1 WHERE id = $2", [
       "running",
       auditId,
