@@ -126,12 +126,27 @@ export async function processAudit(job) {
     console.log(`[Job ${job.id}] Audit ${auditId} completed successfully`);
   } catch (err) {
     console.error(`[Job ${job.id}] Error processing audit ${auditId}:`, err);
-    // Mark audit as failed
-    await pool.query("UPDATE audits SET status = $1 WHERE id = $2", [
-      "failed",
-      auditId,
-    ]);
 
-    throw err; // BullMQ will retry based on settings
+    const maxAttempts = job.opts.attempts || 1; //opts is built in BullMQ parameter
+    const isLastAttempt = job.attemptsMade + 1 >= maxAttempts;
+
+    if (isLastAttempt) {
+      // All retries exhausted. mark as terminal failure
+      await pool.query("UPDATE audits SET status = $1 WHERE id = $2", [
+        "failed",
+        auditId,
+      ]);
+    } else {
+      // Retries remain — revert to pending so the client keeps polling
+      await pool.query("UPDATE audits SET status = $1 WHERE id = $2", [
+        "pending",
+        auditId,
+      ]);
+      console.log(
+        `[Job ${job.id}] Attempt ${job.attemptsMade + 1}/${maxAttempts} failed, will retry`,
+      );
+    }
+
+    throw err; // BullMQ may retry based on settings
   }
 }

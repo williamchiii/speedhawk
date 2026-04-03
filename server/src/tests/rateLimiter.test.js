@@ -11,10 +11,6 @@ vi.mock("../utils/logger.js", () => ({
 import { strictRateLimiter } from "../middlewares/rateLimiter.js";
 import { strictRateLimit } from "../config/redis.js";
 
-
-import { strictRateLimiter } from "../middlewares/rateLimiter.js";
-import { strictRateLimit } from "../config/redis.js";
-
 describe("rateLimiter", () => {
   const req = { ip: "127.0.0.1" };
   const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };
