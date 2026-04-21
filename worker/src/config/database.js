@@ -1,14 +1,22 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import "dotenv/config";
 import pg from "pg";
 
-const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+// Adjust the relative path based on where your cert actually lives
+const certPath = path.resolve(__dirname, "../../certs/global-bundle.pem");
 
-pool.on("error", (err) => {
-    console.error(`Unexpected error connectint to PostgreSQL on worker folder: ${err}`);
-    process.exit(-1);
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    ca: fs.readFileSync(certPath).toString(),
+    rejectUnauthorized: true,
+  },
+  max: 10,
 });
 
 export default pool;

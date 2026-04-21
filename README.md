@@ -21,9 +21,9 @@ worker/   # Background job processor, Gemini API
 ## Setup
 1. Start all the docker containers (on root directory):
 ~~~
-docker-compose up --build
+docker-compose up --build 
 ~~~
-2. Run database migrations on new terminal on root directory (replace the {} with yours)
+or
 ~~~
-goose -dir ./server/internal/database/migrations postgres "postgresql://{USER}:{PASSWORD}@localhost:5432/{DB_NAME}?sslmode=disable" up
+docker-compsoe up
 ~~~

@@ -1,20 +1,23 @@
-import pg from "pg";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import logger from "../utils/logger.js";
 import "dotenv/config";
+import pg from "pg";
 
-const { Pool } = pg;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const pool = new Pool({
+// Adjust the relative path based on where your cert actually lives
+const certPath = path.resolve(__dirname, "../../certs/global-bundle.pem");
+
+const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-});
-
-pool.on("connect", () => {
-  logger.info("Connected to database (PostgreSQL)");
-});
-
-pool.on("error", (err) => {
-  logger.critical(`Error connected to database (PostgreSQL) ${err}`);
-  process.exit(1);
+  ssl: {
+    ca: fs.readFileSync(certPath).toString(),
+    rejectUnauthorized: true,
+  },
+  max: 10,
 });
 
 export async function testDatabase() {
@@ -23,9 +26,10 @@ export async function testDatabase() {
     logger.info(`Database connected! Current time: ${result.rows[0].now}`);
     return true;
   } catch (error) {
-    logger.critical("Error connecting to database:", error.message);
+    logger.critical(`Error connecting to database: ${error.message}`);
+    console.error("Full error:", error);
     return false;
   }
-};
+}
 
 export default pool;
