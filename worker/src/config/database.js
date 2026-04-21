@@ -8,7 +8,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Adjust the relative path based on where your cert actually lives
-// If cert is at server/global-bundle.pem, this path works:
 const certPath = path.resolve(__dirname, "../../certs/global-bundle.pem");
 
 const pool = new pg.Pool({
