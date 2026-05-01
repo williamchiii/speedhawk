@@ -8,17 +8,19 @@ services:
       - /app/node_modules
   server:
     build: ./server
-    ports: 
+    ports:
       - "3001:3001"
     volumes:
       - ./server:/app
       - /app/node_modules
+      - ./shared/certs:/shared/certs
     env_file: server/.env
   worker:
     build: ./worker
     volumes:
       - ./worker:/app
       - /app/node_modules
+      - ./shared/certs:/shared/certs
     env_file: worker/.env
 volumes:
   postgres_data:
