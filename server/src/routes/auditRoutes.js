@@ -7,7 +7,8 @@ import { strictRateLimiter, generousRateLimiter } from "../middlewares/rateLimit
 const router = express.Router();
 
 //CREATE audit
-router.post("/", createAudit);
+//Rate limit strictRateLimiter for now
+router.post("/", strictRateLimiter, createAudit);
 
 //READ audit by ID
 router.get("/:id", generousRateLimiter, getAudit);
