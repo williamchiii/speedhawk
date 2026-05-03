@@ -16,9 +16,10 @@ const createRateLimiter = (limiterInstance) => {
       //if under the rate limit continue to next middleware
       next();
     } catch (error) {
-      logger.error("rate limit error");
-      //pass error to Express's global error handler
-      next(error);
+      logger.error(`rate limit error: ${error}`);
+      return res
+        .status(503)
+        .json({ error: "Rate limiting unavailable. Please try again later." });
     }
   };
 };
