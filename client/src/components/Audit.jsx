@@ -8,7 +8,6 @@ const TestAudit = () => {
 
   const testAudit = async (e) => {
     e.preventDefault();
-    if (loading) return;
     setLoading(true);
 
     //create audit (with axios)
