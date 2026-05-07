@@ -4,9 +4,12 @@ import { useState } from "react";
 const TestAudit = () => {
   const [url, setUrl] = useState("");
   const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const testAudit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
 
     //create audit (with axios)
     const createRes = await axios.post("http://localhost:3001/api/audits", {url});
@@ -25,15 +28,18 @@ const TestAudit = () => {
 
       if (data.status === "complete") {
         setResult(JSON.stringify(data, null, 2));
+        setLoading(false)
         return;
       } else if (data.status === "failed") {
         setResult("Audit failed!");
+        setLoading(false);
         return;
       }
       attempts++;
       setResult(`Checking... (${attempts * 2}s elapsed)`);
     }
     setResult(`Timeout: Audit took too long (over ${maxAttempts * 2}s)`);
+    setLoading(false);
   };
 
   return (
@@ -45,8 +51,8 @@ const TestAudit = () => {
           onChange={(e) => setUrl(e.target.value)}
           placeholder = "https://example.com"
         />
-        <button className="btn btn-primary"type="submit">
-          Test
+        <button className="btn btn-primary" type="submit" disabled={loading}>
+          {loading ? "Running..." : "Test"}
         </button>
       </form>
       {result && (
