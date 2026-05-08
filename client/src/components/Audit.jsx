@@ -10,35 +10,38 @@ const TestAudit = () => {
     e.preventDefault();
     setLoading(true);
 
-    //create audit (with axios)
-    const createRes = await axios.post("http://localhost:3001/api/audits", {url});
-    const audit = createRes.data.audit;
+    try {
+      //create audit (with axios)
+      const createRes = await axios.post("http://localhost:3001/api/audits", {url});
+      const audit = createRes.data.audit;
 
-    setResult(`Created audit ${audit.id}, waiting...`);
+      setResult(`Created audit ${audit.id}, waiting...`);
 
-    //poll every 2 sec until complete or timeout (max 120sec)
-    let attempts = 0
-    const maxAttempts = 120/2; //max seconds / 2
-    while (attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); //wait 2 sec
+      //poll every 2 sec until complete or timeout (max 120sec)
+      let attempts = 0
+      const maxAttempts = 120/2; //max seconds / 2
+      while (attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 2000)); //wait 2 sec
 
-      const getRes = await axios.get(`http://localhost:3001/api/audits/${audit.id}`);
-      const data = getRes.data;
+        const getRes = await axios.get(`http://localhost:3001/api/audits/${audit.id}`);
+        const data = getRes.data;
 
-      if (data.status === "complete") {
-        setResult(JSON.stringify(data, null, 2));
-        setLoading(false)
-        return;
-      } else if (data.status === "failed") {
-        setResult("Audit failed!");
-        setLoading(false);
-        return;
+        if (data.status === "complete") {
+          setResult(JSON.stringify(data, null, 2));
+          return;
+        } else if (data.status === "failed") {
+          setResult("Audit failed!");
+          return;
+        }
+        attempts++;
+        setResult(`Checking... (${attempts * 2}s elapsed)`);
       }
-      attempts++;
-      setResult(`Checking... (${attempts * 2}s elapsed)`);
+      setResult(`Timeout: Audit took too long (over ${maxAttempts * 2}s)`);
+    } catch (error) {
+      setResult(error?.message ? `Audit request failed: ${error.message}` : "Audit request failed.");
+    } finally {
+      setLoading(false);
     }
-    setResult(`Timeout: Audit took too long (over ${maxAttempts * 2}s)`);
-    setLoading(false);
   };
 
   return (
