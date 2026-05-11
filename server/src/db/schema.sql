@@ -1,5 +1,6 @@
 -- Speedhawk Database Schema
--- Run this to initialize the database
+-- MANUAL REFERNCE DOC. NOT USED FOR ANYTHING EXCEPT REFERENCE
+-- **outdated** NOT A SOURCE OF TRUTH.. Run this to initialize the database
 -- Don't run unless you need to/know what you are doing
 
 -- Create audits table
@@ -19,7 +20,16 @@ CREATE TABLE IF NOT EXISTS metrics (
     ttfb INTEGER,
     fcp INTEGER,
     lcp INTEGER,
-    bundle_size INTEGER
+    bundle_size INTEGER,
+    cls NUMERIC,
+    speed_index NUMERIC,
+    tbt INTEGER,
+    js_byte_weight INTEGER,
+    css_byte_weight INTEGER,
+    image_byte_weight INTEGER,
+    font_byte_weight INTEGER,
+    render_blocking_req INTEGER,
+    unused_js_estimate INTEGER
 );
 
 -- Create suggestions table
