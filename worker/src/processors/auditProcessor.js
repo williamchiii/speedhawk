@@ -5,6 +5,18 @@ import { GoogleGenAI } from "@google/genai";
 import { validateSuggestions, getFallbackSuggestions } from "../utils/validateSuggestions.js";
 import "dotenv/config";
 
+function getAuditItemCount(lhr, auditIds) {
+  for (const auditId of auditIds) {
+    const items = lhr.audits[auditId]?.details?.items;
+
+    if (Array.isArray(items)) {
+      return items.length;
+    }
+  }
+
+  return null;
+}
+
 export async function processAudit(job) {
   const { auditId, url } = job.data;
 
@@ -50,14 +62,39 @@ export async function processAudit(job) {
       (lhr.audits["total-byte-weight"]?.numericValue || 0) / 1024,
     );
 
+    // Extract expanded metrics
+    const cls = lhr.audits["cumulative-layout-shift"]?.numericValue ?? null;
+    const speedIndex = metrics.speedIndex != null ? Math.round(metrics.speedIndex) : null;
+    const tbt = metrics.totalBlockingTime != null ? Math.round(metrics.totalBlockingTime) : null;
+    const renderBlockingReq = getAuditItemCount(lhr, [
+      "render-blocking-insight",
+      "render-blocking-resources",
+    ]);
+    const unusedJsEstimate = lhr.audits["unused-javascript"]?.numericValue != null
+      ? Math.round(lhr.audits["unused-javascript"].numericValue / 1024)
+      : null;
+
+    // Byte weights by resource type from resource-summary audit (convert bytes to KB)
+    const resourceItems = lhr.audits["resource-summary"]?.details?.items ?? [];
+    const resourceByType = Object.fromEntries(resourceItems.map((item) => [item.resourceType, item]));
+    const jsBytes = resourceByType["script"]?.transferSize != null ? Math.round(resourceByType["script"].transferSize / 1024) : null;
+    const cssBytes = resourceByType["stylesheet"]?.transferSize != null ? Math.round(resourceByType["stylesheet"].transferSize / 1024) : null;
+    const imageBytes = resourceByType["image"]?.transferSize != null ? Math.round(resourceByType["image"].transferSize / 1024) : null;
+    const fontBytes = resourceByType["font"]?.transferSize != null ? Math.round(resourceByType["font"].transferSize / 1024) : null;
+
     console.log(
-      `[Job ${job.id}] Score: ${score}, TTFB: ${ttfb}ms, FCP: ${fcp}ms, LCP: ${lcp}ms, Total: ${bundleSize}KB`,
+      `[Job ${job.id}] Score: ${score}, TTFB: ${ttfb}ms, FCP: ${fcp}ms, LCP: ${lcp}ms, Total: ${bundleSize}KB, CLS: ${cls}, TBT: ${tbt}ms`,
     );
 
     //save metrics to database
     await pool.query(
-      "INSERT INTO metrics (audit_id, ttfb, fcp, lcp, bundle_size) VALUES ($1, $2, $3, $4, $5)",
-      [auditId, ttfb, fcp, lcp, bundleSize],
+      `INSERT INTO metrics (
+        audit_id, ttfb, fcp, lcp, bundle_size,
+        cls, speed_index, tbt,
+        js_byte_weight, css_byte_weight, image_byte_weight, font_byte_weight,
+        render_blocking_req, unused_js_estimate
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      [auditId, ttfb, fcp, lcp, bundleSize, cls, speedIndex, tbt, jsBytes, cssBytes, imageBytes, fontBytes, renderBlockingReq, unusedJsEstimate],
     );
 
     //generate suggestions based on the performance thresholds with Google Gemini
