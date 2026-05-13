@@ -5,6 +5,18 @@ import { GoogleGenAI } from "@google/genai";
 import { validateSuggestions, getFallbackSuggestions } from "../utils/validateSuggestions.js";
 import "dotenv/config";
 
+function getAuditItemCount(lhr, auditIds) {
+  for (const auditId of auditIds) {
+    const items = lhr.audits[auditId]?.details?.items;
+
+    if (Array.isArray(items)) {
+      return items.length;
+    }
+  }
+
+  return null;
+}
+
 export async function processAudit(job) {
   const { auditId, url } = job.data;
 
@@ -54,7 +66,10 @@ export async function processAudit(job) {
     const cls = lhr.audits["cumulative-layout-shift"]?.numericValue ?? null;
     const speedIndex = metrics.speedIndex != null ? Math.round(metrics.speedIndex) : null;
     const tbt = metrics.totalBlockingTime != null ? Math.round(metrics.totalBlockingTime) : null;
-    const renderBlockingReq = lhr.audits["render-blocking-resources"]?.details?.items?.length ?? null;
+    const renderBlockingReq = getAuditItemCount(lhr, [
+      "render-blocking-insight",
+      "render-blocking-resources",
+    ]);
     const unusedJsEstimate = lhr.audits["unused-javascript"]?.numericValue != null
       ? Math.round(lhr.audits["unused-javascript"].numericValue / 1024)
       : null;
