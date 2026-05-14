@@ -16,7 +16,7 @@ worker/   # Background job processor, Gemini API
 ## Prerequisites
 - Node.js and npm
 - Docker Desktop
-- Goose (for database migrations)
+- Goose, only if you need to apply a database migration
 
 ## Setup
 1. Start all the docker containers (on root directory):
