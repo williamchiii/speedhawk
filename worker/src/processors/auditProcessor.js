@@ -70,8 +70,9 @@ export async function processAudit(job) {
       "render-blocking-insight",
       "render-blocking-resources",
     ]);
-    const unusedJsEstimate = lhr.audits["unused-javascript"]?.numericValue != null
-      ? Math.round(lhr.audits["unused-javascript"].numericValue / 1024)
+    const unusedJsItems = lhr.audits["unused-javascript"]?.details?.items ?? [];
+    const unusedJsEstimate = unusedJsItems.length > 0
+      ? Math.round(unusedJsItems.reduce((sum, item) => sum + (item.wastedBytes ?? 0), 0) / 1024)
       : null;
 
     // Byte weights by resource type from resource-summary audit (convert bytes to KB)
