@@ -21,9 +21,9 @@ worker/   # Background job processor, Gemini API
 ## Setup
 1. Start all the docker containers (on root directory):
 ~~~
-docker-compose up --build 
+docker compose up --build 
 ~~~
 or
 ~~~
-docker-compsoe up
+docker compsoe up
 ~~~
