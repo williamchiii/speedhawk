@@ -3,6 +3,7 @@ import puppeteer from "puppeteer";
 import pool from "../config/database.js";
 import { GoogleGenAI } from "@google/genai";
 import { validateSuggestions, getFallbackSuggestions } from "../utils/validateSuggestions.js";
+import { extractPageContext } from "../utils/extractPageContext.js";
 import "dotenv/config";
 
 function getAuditItemCount(lhr, auditIds) {
@@ -39,12 +40,16 @@ export async function processAudit(job) {
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: "networkidle2" });
+
     const { lhr } = await lighthouse(url, {
       port: new URL(browser.wsEndpoint()).port,
       output: "json",
       onlyCategories: ["performance"],
     });
 
+    const pageContext = await extractPageContext(lhr, page);
     await browser.close();
 
     //Extract metrics from lighthouse results
@@ -99,18 +104,23 @@ export async function processAudit(job) {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
       [auditId, ttfb, fcp, lcp, bundleSize, cls, speedIndex, tbt, jsBytes, cssBytes, imageBytes, fontBytes, renderBlockingReq, unusedJsEstimate],
     );
-
     //generate suggestions based on the performance thresholds with Google Gemini
     const suggestions = [];
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }); //automatically gets GEMINI_API_KEY from .env
-      const prompt = `You are a web performance expert. Analyze these metrics and generate 2-4 specific, actionable suggestions:
+      const prompt = `You are a web performance expert. Analyze these metrics and page context, then generate 2-4 specific, actionable suggestions.
 
+        Metrics:
         Performance Score: ${score}/100
         TTFB: ${ttfb}ms (good: <800ms)
-        FCP: ${fcp}ms (good: <1800ms)  
+        FCP: ${fcp}ms (good: <1800ms)
         LCP: ${lcp}ms (good: <2500ms)
         Total Page Weight: ${bundleSize}KB
+
+        Page context (extracted from Lighthouse and the live page):
+        ${JSON.stringify(pageContext, null, 2)}
+
+        Use the page context to make suggestions specific — reference actual file names, audit failures, or resource types where relevant. Do not invent details not present in the context.
 
         CRITICAL: You MUST return a valid JSON array. Each object MUST have exactly these three fields:
         - "type": string (one of: "performance", "bundle", "image", "rendering")
