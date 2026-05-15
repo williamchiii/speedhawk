@@ -41,7 +41,9 @@ export async function processAudit(job) {
     });
 
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle2" });
+    // Best-effort navigation — don't let a timeout here fail the whole audit.
+    // "domcontentloaded" is enough for DOM metadata; Lighthouse does its own load.
+    await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => {});
 
     const { lhr } = await lighthouse(url, {
       port: new URL(browser.wsEndpoint()).port,
