@@ -25,5 +25,5 @@ docker compose up --build
 ~~~
 or
 ~~~
-docker compsoe up
+docker compose up
 ~~~
