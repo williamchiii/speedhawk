@@ -1,13 +1,14 @@
 //this page checks the health of the API
 import axios from "axios";
 import { useEffect, useState } from 'react';
+import { apiUrl } from "../utils/apiURL.js";
 
 const HealthPage = () => {
     const [message, setMessage] = useState("Checking backend...");
 
     useEffect(() => {
         axios
-            .get("http://localhost:3001/health")
+            .get(apiUrl("/health"))
             .then(({ data }) => {
                 setMessage(`Backend status: ${data.status} (${data.service})`);
             })
