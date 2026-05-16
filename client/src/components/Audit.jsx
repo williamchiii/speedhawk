@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { apiUrl } from "../utils/apiURL.js";
 
 const TestAudit = () => {
   const [url, setUrl] = useState("");
@@ -12,7 +13,7 @@ const TestAudit = () => {
 
     try {
       //create audit (with axios)
-      const createRes = await axios.post("http://localhost:3001/api/audits", {url});
+      const createRes = await axios.post(apiUrl("/api/audits"), {url});
       const audit = createRes.data.audit;
 
       setResult(`Created audit ${audit.id}, waiting...`);
@@ -23,7 +24,7 @@ const TestAudit = () => {
       while (attempts < maxAttempts) {
         await new Promise((resolve) => setTimeout(resolve, 2000)); //wait 2 sec
 
-        const getRes = await axios.get(`http://localhost:3001/api/audits/${audit.id}`);
+        const getRes = await axios.get(apiUrl(`/api/audits/${audit.id}`));
         const data = getRes.data;
 
         if (data.status === "complete") {
