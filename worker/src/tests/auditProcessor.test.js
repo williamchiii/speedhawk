@@ -39,20 +39,37 @@ function makeBrowserMock({ lighthouseThrows = false, extractPageContextThrows = 
 // The helper below mirrors the browser block in processAudit exactly:
 //
 //   let browser;
+//   let auditError;
 //   try {
 //     browser = await launch();
 //     ... lighthouse ...
+//   } catch (err) {
+//     auditError = err;
+//     throw err;
 //   } finally {
-//     if (browser) await browser.close().catch(() => {});
+//     if (browser) {
+//       try { await browser.close(); }
+//       catch (closeErr) { if (!auditError) throw closeErr; }
+//     }
 //   }
 //
 async function runBrowserBlock({ launch, runLighthouse }) {
   let browser;
+  let auditError;
   try {
     browser = await launch();
     await runLighthouse(browser);
+  } catch (err) {
+    auditError = err;
+    throw err;
   } finally {
-    if (browser) await browser.close().catch(() => {});
+    if (browser) {
+      try {
+        await browser.close();
+      } catch (closeErr) {
+        if (!auditError) throw closeErr;
+      }
+    }
   }
 }
 
@@ -127,6 +144,21 @@ describe("auditProcessor browser lifecycle", () => {
           runLighthouse: async () => { throw new Error("original error"); },
         }),
       /original error/,
+    );
+  });
+
+  it("propagates close error on the success path", async () => {
+    const flakyBrowser = {
+      close: mock.fn(async () => { throw new Error("chromium shutdown error"); }),
+    };
+
+    await assert.rejects(
+      () =>
+        runBrowserBlock({
+          launch: async () => flakyBrowser,
+          runLighthouse: async () => {},
+        }),
+      /chromium shutdown error/,
     );
   });
 });

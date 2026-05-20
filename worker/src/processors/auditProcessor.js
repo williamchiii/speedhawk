@@ -37,6 +37,7 @@ export async function processAudit(job) {
     let browser;
     let lhr;
     let pageContext;
+    let auditError;
     try {
       browser = await puppeteer.launch({
         executablePath: process.env.CHROME_BIN || "/usr/bin/chromium",
@@ -56,8 +57,19 @@ export async function processAudit(job) {
       }));
 
       pageContext = await extractPageContext(lhr, page);
+    } catch (err) {
+      auditError = err;
+      throw err;
     } finally {
-      if (browser) await browser.close().catch(() => {});
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (closeErr) {
+          // On the success path, propagate so the process leak is visible to BullMQ.
+          // When an upstream error already failed the audit, swallow to avoid masking it.
+          if (!auditError) throw closeErr;
+        }
+      }
     }
 
     //Extract metrics from lighthouse results
