@@ -34,25 +34,31 @@ export async function processAudit(job) {
     ]);
 
     //launch headless browser and run lighthouse
-    const browser = await puppeteer.launch({
-      executablePath: process.env.CHROME_BIN || "/usr/bin/chromium",
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+    let browser;
+    let lhr;
+    let pageContext;
+    try {
+      browser = await puppeteer.launch({
+        executablePath: process.env.CHROME_BIN || "/usr/bin/chromium",
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      });
 
-    const page = await browser.newPage();
-    // Best-effort navigation — don't let a timeout here fail the whole audit.
-    // "domcontentloaded" is enough for DOM metadata; Lighthouse does its own load.
-    await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => {});
+      const page = await browser.newPage();
+      // Best-effort navigation — don't let a timeout here fail the whole audit.
+      // "domcontentloaded" is enough for DOM metadata; Lighthouse does its own load.
+      await page.goto(url, { waitUntil: "domcontentloaded" }).catch(() => {});
 
-    const { lhr } = await lighthouse(url, {
-      port: new URL(browser.wsEndpoint()).port,
-      output: "json",
-      onlyCategories: ["performance"],
-    });
+      ({ lhr } = await lighthouse(url, {
+        port: new URL(browser.wsEndpoint()).port,
+        output: "json",
+        onlyCategories: ["performance"],
+      }));
 
-    const pageContext = await extractPageContext(lhr, page);
-    await browser.close();
+      pageContext = await extractPageContext(lhr, page);
+    } finally {
+      if (browser) await browser.close().catch(() => {});
+    }
 
     //Extract metrics from lighthouse results
     const score = Math.round(lhr.categories.performance.score * 100);
