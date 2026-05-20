@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test src/tests/extractPageContext.test.js",
+    "test": "node --test src/tests/*.test.js",
     "dev": "nodemon src/worker.js"
   },
   "keywords": [],
