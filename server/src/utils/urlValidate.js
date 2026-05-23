@@ -20,8 +20,9 @@ export function isValidURL(urlValue) {
   }
 }
 export function normalizeURL(value) {
-  let url = value.trim(); //.trim removes whitespace
-  // If protocol missing, prepend https://
+  if (typeof value !== "string") return null;
+  let url = value.trim();
+  if (!url) return null;
   if (!/^https?:\/\//i.test(url)) {
     url = `https://${url}`;
   }
