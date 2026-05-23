@@ -7,11 +7,18 @@ import { isValidURL, normalizeURL } from "../utils/urlValidate.js";
 //Route: POST /api/audits
 export async function createAudit(req, res) {
     try{
-        var { url } = req.body;
+        const rawUrl = req.body.url;
 
-        url = normalizeURL(url) //adds https// to URL if it doesnt have it
-        if (!isValidURL(url)){ 
-            return res.status(400).json({error: "URL is not valid"});
+        if (rawUrl === undefined || rawUrl === null) {
+            return res.status(400).json({ error: "url is required" });
+        }
+        if (typeof rawUrl !== "string") {
+            return res.status(400).json({ error: "url must be a string" });
+        }
+
+        const url = normalizeURL(rawUrl);
+        if (!url || !isValidURL(url)) {
+            return res.status(400).json({ error: "URL is not valid" });
         }
 
         //Create pending audit in the database
