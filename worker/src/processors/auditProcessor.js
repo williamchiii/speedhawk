@@ -221,6 +221,6 @@ export async function processAudit(job) {
       );
     }
 
-    throw err; // BullMQ may retry based on settings
+    throw err; // BullMQ may retry based on settings.
   }
 }
