@@ -1,6 +1,9 @@
 //Validates AI-generated suggestions to ensure they meet database schema requirements
 //if not then fall back to non AI suggestions
 
+const VALID_TYPES = new Set(["performance", "bundle", "image", "rendering"]);
+const VALID_IMPACTS = new Set(["high", "medium", "low"]);
+
 export function validateSuggestions(suggestions, jobId) {
   //ensure input is an array
   if (!Array.isArray(suggestions)) {
@@ -12,20 +15,35 @@ export function validateSuggestions(suggestions, jobId) {
   }
   //Validate each suggestion has required fields matching schema
   const validSuggestions = suggestions.filter((s) => {
-    const hasRequiredFields =
-      typeof s.type === "string" &&
-      s.type.length > 0 &&
-      typeof s.message === "string" &&
-      s.message.length > 0 &&
-      typeof s.impact === "string" &&
-      s.impact.length > 0;
-    if (!hasRequiredFields) {
+    const type = typeof s.type === "string" ? s.type.trim() : "";
+    const message = typeof s.message === "string" ? s.message.trim() : "";
+    const impact = typeof s.impact === "string" ? s.impact.trim() : "";
+
+    if (!type || !message || !impact) {
       console.warn(
         `[Job ${jobId}] Invalid AI suggestion (missing required fields):`,
         s,
       );
+      return false;
     }
-    return hasRequiredFields;
+
+    if (!VALID_TYPES.has(type)) {
+      console.warn(
+        `[Job ${jobId}] Invalid AI suggestion (unsupported type "${type}"):`,
+        s,
+      );
+      return false;
+    }
+
+    if (!VALID_IMPACTS.has(impact)) {
+      console.warn(
+        `[Job ${jobId}] Invalid AI suggestion (unsupported impact "${impact}"):`,
+        s,
+      );
+      return false;
+    }
+
+    return true;
   });
   console.log(
     `[Job ${jobId}] Validated ${validSuggestions.length}/${suggestions.length} AI suggestions`,
