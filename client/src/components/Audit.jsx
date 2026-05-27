@@ -7,33 +7,21 @@ import { scoreColor, scoreLabel, ms, kb } from "../utils/auditHelpers.js";
 
 function ScoreRing({ score }) {
   if (score == null) return null;
-  const radius = 40;
-  const circ = 2 * Math.PI * radius;
   const pct = Math.max(0, Math.min(100, score));
-  const dash = (pct / 100) * circ;
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <svg width="110" height="110" viewBox="0 0 110 110">
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="currentColor"
-          className="text-base-300" strokeWidth="10" />
-        <circle cx="55" cy="55" r={radius} fill="none"
-          stroke="currentColor"
-          className={scoreColor(score)}
-          strokeWidth="10"
-          strokeDasharray={`${dash} ${circ}`}
-          strokeLinecap="round"
-          transform="rotate(-90 55 55)"
-        />
-        <text x="55" y="60" textAnchor="middle"
-          className={`text-2xl font-bold fill-current ${scoreColor(score)}`}
-          fontSize="22" fontWeight="bold" fill="currentColor">
+    <div className={`flex flex-col items-center gap-2 ${scoreColor(score)}`}>
+      <div
+        className="grid h-28 w-28 place-items-center rounded-full"
+        style={{ background: `conic-gradient(currentColor ${pct}%, rgba(255,255,255,.08) 0)` }}
+      >
+        <div className="grid h-20 w-20 place-items-center rounded-full bg-base-100">
+          <span className="text-3xl font-bold">
           {score}
-        </text>
-      </svg>
-      <span className={`text-sm font-semibold ${scoreColor(score)}`}>
-        {scoreLabel(score)}
-      </span>
+          </span>
+        </div>
+      </div>
+      <span className="text-sm font-semibold">{scoreLabel(score)}</span>
     </div>
   );
 }
@@ -169,13 +157,13 @@ const Audit = () => {
       {/* Input form */}
       <form className="flex gap-2" onSubmit={testAudit}>
         <input
-          className="input input-bordered flex-1"
+          className="input flex-1 border-white/20 bg-white/10 text-white placeholder:text-white/50"
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com"
         />
-        <button className="btn btn-primary" type="submit" disabled={loading}>
+        <button className="btn border-white/20 bg-white/20 text-white hover:bg-white/30" type="submit" disabled={loading}>
           {loading ? <span className="loading loading-spinner loading-sm" /> : "Audit"}
         </button>
       </form>
@@ -189,7 +177,7 @@ const Audit = () => {
       )}
 
       {result?.type === "error" && (
-        <div className="alert alert-error text-sm">{result.payload}</div>
+        <div className="text-sm text-white/70">{result.payload}</div>
       )}
 
       {result?.type === "data" && (
