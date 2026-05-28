@@ -2,9 +2,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 48%, rgba(46, 46, 46, 0.68), rgba(12, 12, 12, 0.74) 34%, rgba(3, 3, 3, 0.98) 72%),
-    #030303;
+  background: #030303;
   pointer-events: none;
 }
 
@@ -22,18 +20,6 @@
   width: 100%;
   height: 100%;
   z-index: 1;
-}
-
-.dotted-surface__glow {
-  position: absolute;
-  left: 50%;
-  top: 48%;
-  width: min(58rem, 72vw);
-  height: min(24rem, 34vh);
-  transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03) 45%, transparent 72%);
-  filter: blur(20px);
-  z-index: 0;
 }
 
 .dotted-surface__fade {

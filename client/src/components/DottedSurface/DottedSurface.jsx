@@ -43,8 +43,8 @@ const DottedSurface = ({ className = "" }) => {
         if (baseY < horizon - 16 || baseY > height + 80) continue;
 
         const rowAlpha = Math.max(0, Math.min(1, (baseY - horizon) / (height * 0.56)));
-        const farFade = Math.max(0.08, Math.min(1, (84 - z) / 70));
-        const radius = Math.max(0.8, Math.min(2.4, perspective * 0.012));
+        const farFade = Math.max(0.18, Math.min(1, (84 - z) / 70));
+        const radius = Math.max(1.1, Math.min(3.1, perspective * 0.016));
 
         for (let x = -xLimit; x <= xLimit; x += spacing) {
           const jitterX = (hash(x, z) - 0.5) * 0.32;
@@ -63,7 +63,7 @@ const DottedSurface = ({ className = "" }) => {
           }
 
           const centerFade = 1 - Math.min(0.55, Math.abs(screenX - width / 2) / width);
-          const alpha = (0.26 + rowAlpha * 0.9) * farFade * centerFade;
+          const alpha = Math.min(0.95, (0.42 + rowAlpha * 1.05) * farFade * centerFade);
 
           context.fillStyle = `rgba(238, 242, 247, ${alpha})`;
           context.fillRect(screenX, screenY, radius, radius);
@@ -86,7 +86,6 @@ const DottedSurface = ({ className = "" }) => {
   return (
     <div className={`dotted-surface ${className}`} aria-hidden="true">
       <canvas ref={canvasRef} className="dotted-surface__canvas" />
-      <div className="dotted-surface__glow" />
       <div className="dotted-surface__fade" />
     </div>
   );

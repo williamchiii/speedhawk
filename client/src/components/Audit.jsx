@@ -70,7 +70,6 @@ function AuditResults({ data }) {
       {/* Header row */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <p className="text-xs text-base-content/50 uppercase tracking-widest mb-1">Audited URL</p>
           <a href={data.url} target="_blank" rel="noreferrer"
             className="link link-primary text-sm break-all">
             {data.url}
