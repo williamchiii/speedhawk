@@ -73,6 +73,32 @@ Copy `.env.example` to `.env` and fill in:
 | `UPSTASH_REDIS_REST_TOKEN` | Redis password / Upstash token |
 | `GEMINI_API_KEY` | Google Gemini API key |
 
+## Tests
+
+Tests use Node's built-in test runner (`node:test`) — no extra test framework is installed.
+
+```bash
+npm test
+```
+
+This runs every `src/tests/*.test.js` file. The `test` script passes
+`--experimental-test-module-mocks`, which `processAudit.test.js` relies on to
+mock the Postgres pool, Puppeteer, Lighthouse, and Gemini.
+
+| Test file | Covers |
+|---|---|
+| `validateSuggestions.test.js` | Schema validation of AI suggestions — valid/invalid types, impacts, messages, non-array input, mixed responses |
+| `getFallbackSuggestions.test.js` | Rule-based fallback suggestions — LCP / bundle / FCP / TTFB thresholds, the always-one-suggestion guarantee, and ordering |
+| `extractPageContext.test.js` | Page-context extraction helpers — actionable audits, largest network resources, render-blocking, unoptimized images, DOM metadata |
+| `processAudit.test.js` | The job handler against mocked dependencies — status transitions (`running` → `failed`/`pending`), browser cleanup, stale-data cleanup ordering, DB-error propagation, and the success path writing fallback suggestions |
+| `auditProcessor.test.js` | Browser-lifecycle contract and pure metric-extraction logic |
+
+To run a single file directly:
+
+```bash
+node --experimental-test-module-mocks --test src/tests/processAudit.test.js
+```
+
 ## Docker
 
 The `Dockerfile` installs Chromium via apt and sets `PUPPETEER_SKIP_DOWNLOAD=true` so Puppeteer does not download a second copy.
