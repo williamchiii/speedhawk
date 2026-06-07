@@ -1,12 +1,15 @@
+// Cutoffs match Lighthouse's documented control points: 90+ is green/good,
+// 50–89 is the orange "needs improvement" band, and below 50 is red/poor.
+// See https://developer.chrome.com/docs/lighthouse/performance/performance-scoring
 export function scoreColor(score) {
-  if (score >= 85) return "text-success";
-  if (score >= 40) return "text-warning";
+  if (score >= 90) return "text-success";
+  if (score >= 50) return "text-warning";
   return "text-error";
 }
 
 export function scoreLabel(score) {
-  if (score >= 85) return "Good";
-  if (score >= 40) return "Needs Work";
+  if (score >= 90) return "Good";
+  if (score >= 50) return "Needs Work";
   return "Poor";
 }
 

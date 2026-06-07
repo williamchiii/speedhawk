@@ -5,22 +5,15 @@ import { scoreColor, scoreLabel, ms, kb } from "../utils/auditHelpers.js";
 
 // ── sub-components ────────────────────────────────────────────────────────────
 
-function ScoreRing({ score }) {
+function ScoreDisplay({ score }) {
   if (score == null) return null;
-  const pct = Math.max(0, Math.min(100, score));
 
   return (
-    <div className={`flex flex-col items-center gap-2 ${scoreColor(score)}`}>
-      <div
-        className="grid h-28 w-28 place-items-center rounded-full"
-        style={{ background: `conic-gradient(currentColor ${pct}%, rgba(255,255,255,.08) 0)` }}
-      >
-        <div className="grid h-20 w-20 place-items-center rounded-full bg-base-100">
-          <span className="text-3xl font-bold">
-          {score}
-          </span>
-        </div>
-      </div>
+    <div className={`flex flex-col items-end ${scoreColor(score)}`}>
+      <span className="text-4xl font-bold leading-none">
+        {score}
+        <span className="text-2xl">%</span>
+      </span>
       <span className="text-sm font-semibold">{scoreLabel(score)}</span>
     </div>
   );
@@ -98,7 +91,7 @@ function AuditResults({ data }) {
             <p className="text-xs text-base-content/40 mt-1">Completed {completedAt}</p>
           )}
         </div>
-        <ScoreRing score={data.score} />
+        <ScoreDisplay score={data.score} />
       </div>
 
       {/* Metrics */}
