@@ -28,9 +28,9 @@ function ScoreRing({ score }) {
 
 function MetricRow({ label, value }) {
   return (
-    <div className="flex justify-between items-center py-1 border-b border-base-300 last:border-0">
-      <span className="text-sm text-base-content/60">{label}</span>
-      <span className="text-sm font-mono font-medium">{value}</span>
+    <div className="flex justify-between items-center py-1 border-b border-white/10 last:border-0">
+      <span className="text-sm text-white/50">{label}</span>
+      <span className="text-sm font-mono font-medium text-white/90">{value}</span>
     </div>
   );
 }
@@ -38,9 +38,9 @@ function MetricRow({ label, value }) {
 function MetricsCard({ metrics }) {
   if (!metrics) return null;
   return (
-    <div className="card bg-base-200 shadow-sm">
+    <div className="card border border-white/10 bg-white/5 backdrop-blur-xl shadow-xl">
       <div className="card-body gap-2 p-5">
-        <h3 className="card-title text-base">Core Web Vitals</h3>
+        <h3 className="card-title text-base text-white">Core Web Vitals</h3>
         <MetricRow label="Time to First Byte (TTFB)" value={ms(metrics.ttfb)} />
         <MetricRow label="First Contentful Paint (FCP)" value={ms(metrics.fcp)} />
         <MetricRow label="Largest Contentful Paint (LCP)" value={ms(metrics.lcp)} />
@@ -51,10 +51,30 @@ function MetricsCard({ metrics }) {
   );
 }
 
-function SuggestionCard({ suggestion }) {
+function SuggestionsTerminal({ suggestions }) {
   return (
-    <div className="border-l-2 border-base-300 pl-4 py-1">
-      <p className="text-sm leading-relaxed">{suggestion.message}</p>
+    <div className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-xl overflow-hidden font-mono">
+      {/* Title bar */}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10 bg-white/5">
+        <span className="h-3 w-3 rounded-full bg-red-400/80" />
+        <span className="h-3 w-3 rounded-full bg-yellow-400/80" />
+        <span className="h-3 w-3 rounded-full bg-green-400/80" />
+        <span className="ml-2 text-xs text-white/40">speedhawk — suggestions ({suggestions.length})</span>
+      </div>
+
+      {/* Body */}
+      <div className="p-4 text-sm leading-relaxed flex flex-col gap-2">
+        {suggestions.map((s) => (
+          <div key={s.id} className="flex gap-2">
+            <span className="text-green-400 select-none shrink-0">$</span>
+            <p className="text-white/85 wrap-break-word">{s.message}</p>
+          </div>
+        ))}
+        <div className="flex gap-2 items-center">
+          <span className="text-green-400 select-none shrink-0">$</span>
+          <span className="inline-block h-4 w-2 bg-white/70 animate-pulse" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -86,15 +106,7 @@ function AuditResults({ data }) {
 
       {/* Suggestions */}
       {data.suggestions?.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <h3 className="font-semibold text-base">
-            Suggestions
-            <span className="ml-2 badge badge-ghost">{data.suggestions.length}</span>
-          </h3>
-          {data.suggestions.map((s) => (
-            <SuggestionCard key={s.id} suggestion={s} />
-          ))}
-        </div>
+        <SuggestionsTerminal suggestions={data.suggestions} />
       )}
     </div>
   );

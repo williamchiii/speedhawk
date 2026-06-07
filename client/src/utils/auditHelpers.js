@@ -1,12 +1,12 @@
 export function scoreColor(score) {
-  if (score >= 90) return "text-success";
-  if (score >= 50) return "text-warning";
+  if (score >= 85) return "text-success";
+  if (score >= 40) return "text-warning";
   return "text-error";
 }
 
 export function scoreLabel(score) {
-  if (score >= 90) return "Good";
-  if (score >= 50) return "Needs Work";
+  if (score >= 85) return "Good";
+  if (score >= 40) return "Needs Work";
   return "Poor";
 }
 
