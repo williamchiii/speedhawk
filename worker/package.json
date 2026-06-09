@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node --experimental-test-module-mocks --test src/tests/*.test.js",
-    "dev": "nodemon src/worker.js"
+    "dev": "nodemon src/worker.js",
+    "start": "node src/worker.js"
   },
   "keywords": [],
   "author": "",
