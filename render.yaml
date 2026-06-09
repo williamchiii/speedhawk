@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: speedhawk-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: CORS_ORIGIN, sync: false }   # paste client URL after client deploys
+      - { key: DATABASE_URL, sync: false }
+      - { key: UPSTASH_REDIS_REST_URL, sync: false }
+      - { key: UPSTASH_REDIS_REST_TOKEN, sync: false }
+      - { key: REDIS_HOST, sync: false }
+      - { key: REDIS_PORT, sync: false }
+
+  - type: worker
+    name: speedhawk-worker
+    runtime: docker
+    rootDir: worker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ..
+    envVars:
+      - { key: DATABASE_URL, sync: false }
+      - { key: GEMINI_API_KEY, sync: false }
+      - { key: UPSTASH_REDIS_REST_URL, sync: false }
+      - { key: UPSTASH_REDIS_REST_TOKEN, sync: false }
+      - { key: REDIS_HOST, sync: false }
+      - { key: REDIS_PORT, sync: false }
+
+  - type: web
+    name: speedhawk-client
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - { key: VITE_API_BASE_URL, sync: false }   # paste server URL; baked at BUILD time
+    routes:
+      - { type: rewrite, source: /*, destination: /index.html }

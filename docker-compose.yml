@@ -16,7 +16,10 @@ services:
       - ./shared/certs:/shared/certs
     env_file: server/.env
   worker:
-    build: ./worker
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    command: npm run dev   # override prod CMD (node) with nodemon for hot reload
     volumes:
       - ./worker:/app
       - /app/node_modules
