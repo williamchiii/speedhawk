@@ -14,7 +14,7 @@ const worker = new Worker("audits", processAudit, {
   concurrency: 1, //process one job at a time
   limiter: {
     max: 10,
-    duration: 6000, //max 10 jobs per 60 seconds
+    duration: 60000, //max 10 jobs per 60 seconds (60,000ms)
   },
 });
 
