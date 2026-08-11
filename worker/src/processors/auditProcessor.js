@@ -224,3 +224,32 @@ export async function processAudit(job) {
     throw err; // BullMQ may retry based on settings.
   }
 }
+
+const STUCK_AUDIT_TIMEOUT_MINUTES = 15;
+
+// Idempotent: only flips non-terminal rows, for when BullMQ fails a job
+// without ever re-entering processAudit (e.g. a mid-audit crash).
+export async function markOrphanedAuditFailed(auditId) {
+  await pool.query(
+    "UPDATE audits SET status = 'failed' WHERE id = $1 AND status NOT IN ('complete', 'failed')",
+    [auditId],
+  );
+}
+
+// Backstop for audits stuck 'running' with no worker left to finish them.
+export async function sweepStuckAudits() {
+  const result = await pool.query(
+    `UPDATE audits SET status = 'failed'
+     WHERE status = 'running' AND created_at < NOW() - make_interval(mins => $1)
+     RETURNING id`,
+    [STUCK_AUDIT_TIMEOUT_MINUTES],
+  );
+
+  if (result.rows.length > 0) {
+    console.log(
+      `Swept ${result.rows.length} stuck audit(s): ${result.rows.map((r) => r.id).join(", ")}`,
+    );
+  }
+
+  return result.rows.length;
+}
