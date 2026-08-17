@@ -1,0 +1,40 @@
+# Production stack for the Oracle Cloud Always Free ARM VM.
+#
+# Differences from docker-compose.yml (which is the local dev stack):
+#   - no client service (the client is built and served by Cloudflare Pages)
+#   - no source bind mounts, so containers run the code baked into the image
+#   - the server port is published to loopback only, so nothing is reachable
+#     from outside the VM; Tailscale Funnel runs on the host and forwards
+#     public HTTPS traffic to 127.0.0.1:3001
+#
+# The certs bind mount stays: server/Dockerfile builds from ./server, so
+# shared/certs/global-bundle.pem is not part of the server image. The worker
+# image copies the bundle in itself, but mounting it keeps both paths identical.
+#
+# Usage on the VM:
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  server:
+    build: ./server
+    command: npm start
+    ports:
+      # Loopback only. Binding to 0.0.0.0 here would expose the port on the
+      # VM's public interface even with the cloud security list closed.
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./shared/certs:/shared/certs:ro
+    env_file: server/.env
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    volumes:
+      - ./shared/certs:/shared/certs:ro
+    env_file: worker/.env
+    restart: unless-stopped
+    # Lighthouse drives a headless Chromium, which needs more shared memory
+    # than Docker's 64MB default.
+    shm_size: 1gb
