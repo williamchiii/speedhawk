@@ -1,6 +1,7 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
 
 vi.mock("../config/redis.js", () => ({
+  redis: {}, // non-null so the "skip when no creds" guard doesn't fire
   strictRateLimit: { limit: vi.fn() },
   generousRateLimit: { limit: vi.fn() },
 }));

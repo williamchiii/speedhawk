@@ -40,7 +40,9 @@ export async function processAudit(job) {
     let auditError;
     try {
       browser = await puppeteer.launch({
-        executablePath: process.env.CHROME_BIN || "/usr/bin/chromium",
+        // When CHROME_BIN is set (e.g. Docker/Linux), use that path.
+        // Otherwise omit executablePath so Puppeteer uses its own bundled browser.
+        ...(process.env.CHROME_BIN ? { executablePath: process.env.CHROME_BIN } : {}),
         headless: true,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
       });

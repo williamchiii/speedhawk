@@ -1,8 +1,12 @@
-import { strictRateLimit, generousRateLimit } from "../config/redis.js";
+import { strictRateLimit, generousRateLimit, redis } from "../config/redis.js";
 import logger from "../utils/logger.js";
 
 const createRateLimiter = (limiterInstance) => {
   return async (req, res, next) => {
+    // Skip rate limiting entirely when Upstash credentials are not configured
+    // (e.g. local development or test runs).
+    if (!redis) return next();
+
     try {
       //each ip has its own rate limit, in future date have ip or user depending on login or not
       const ip = req.ip;
